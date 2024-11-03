@@ -14,7 +14,7 @@ const TaskOverview: React.FC<Props> = ({tasks}) =>{
         tasks.map((task, index)=>(
             <table className="border border-success border-opacity-50 border-4 m-2 bg-secondary bg-opacity-25">
             <tr>
-                <td>Description: </td>
+                <td>Description:</td>
                 <td>{task.description}</td>
             </tr>
             <tr>

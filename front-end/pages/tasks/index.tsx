@@ -29,9 +29,9 @@ const Tasks: React.FC = () => {
         <title>Tasks</title>
     </Head>
     <Header/>
-    <main className='d-flex  flex-column '>
-    <h1 className='align-self-center'>Tasks</h1>
-    <section className='align-self-center d-flex flex-row p-2 '>
+    <main className='d-flex flex-column align-items-center'>
+    <h1>Tasks</h1>
+    <section className='d-flex flex-row p-2 '>
     <TaskOverview tasks={tasks}></TaskOverview>
     </section>
     </main>

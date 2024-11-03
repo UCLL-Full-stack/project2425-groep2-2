@@ -16,7 +16,7 @@ const Header: React.FC = () => {
           Home
         </Link>
         <Link href="/tasks" className="nav-link px-4 fs-5 text-dark">
-          All tasks
+          Tasks
         </Link>
       </nav>
     </header>
