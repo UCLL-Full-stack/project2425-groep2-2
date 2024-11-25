@@ -3,25 +3,26 @@ import { Task } from '../model/task';
 
 type TaskInput = {
     id?: number;
-    description: string;
+    description?: string;
     sidenote?: string;
     deadline: Date;
     startDate?: Date;
     endDate?: Date;
     priority: PriorityInput;
     done?: boolean;
-    userId: number;
+    userId?: number;
 };
 
 type PriorityInput = {
-    levelName: string;
-    colour: string;
+    id?: number;
+    levelName?: string;
+    colour?: string;
 };
 
 type UserInput = {
     id?: number;
-    username: string;
-    password: string;
+    username?: string;
+    password?: string;
     tasks?: Task[];
 };
 

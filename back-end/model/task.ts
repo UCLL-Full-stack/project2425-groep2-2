@@ -1,6 +1,10 @@
 import { Priority } from './priority';
 import { User } from './user';
-
+import { 
+    Task as TaskPrisma, 
+    Priority as PriorityPrisma ,
+    User as UserPrisma
+} from '@prisma/client';
 export class Task {
     private id?: number;
     private description: string;
@@ -10,7 +14,7 @@ export class Task {
     private deadline: Date;
     private done: boolean;
     private priority: Priority;
-    private userId: number;
+    private user: User;
 
     constructor(task: {
         id?: number;
@@ -21,7 +25,7 @@ export class Task {
         deadline: Date;
         done: boolean;
         priority: Priority;
-        userId: number;
+        user: User;
     }) {
         this.validate(task);
         this.id = task.id;
@@ -32,10 +36,10 @@ export class Task {
         this.deadline = task.deadline;
         this.done = task.done;
         this.priority = task.priority;
-        this.userId = task.userId;
+        this.user = task.user;
     }
 
-    validate(task: { startDate: Date; description: string; deadline: Date; userId: number }) {
+    validate(task: { startDate: Date; description: string; deadline: Date; user: User }) {
         if (!task.description) {
             throw new Error('Description is required.');
         }
@@ -45,8 +49,8 @@ export class Task {
         if (task.startDate > task.deadline) {
             throw new Error('Deadline has to be after startDate.');
         }
-        if (!task.userId) {
-            throw new Error('UserId is required.');
+        if (!task.user) {
+            throw new Error('User is required.');
         }
     }
 
@@ -74,11 +78,25 @@ export class Task {
     getPriority(): Priority {
         return this.priority;
     }
-    getUserId(): number {
-        return this.userId;
+    getUser(): User {
+        return this.user;
     }
     finishTask(): void {
         this.done = true;
         this.endDate = new Date();
+    }
+
+    static from({id, description, sidenote, startDate, endDate, deadline, done, priority, user}: TaskPrisma & {priority: PriorityPrisma; user: UserPrisma}) {
+        return new Task({
+            id, 
+            description, 
+            sidenote: sidenote ?? undefined, 
+            startDate, 
+            endDate, 
+            deadline, 
+            done, 
+            priority: Priority.from(priority), 
+            user: User.from(user)
+        });
     }
 }

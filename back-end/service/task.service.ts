@@ -18,15 +18,6 @@ const createTask = ({
     priority: priorityInput,
     userId,
 }: TaskInput): Task => {
-    // if (!description) {
-    //     throw new Error('Description is required.');
-    // }
-    // if (!deadline) {
-    //     throw new Error('Deadline is required.');
-    // }
-    // if (!userId) {
-    //     throw new Error('userId is required.');
-    // }
     const user = userDb.getUserById(userId);
     if (!user) {
         throw new Error(`User not found with given userId: ${userId}.`);

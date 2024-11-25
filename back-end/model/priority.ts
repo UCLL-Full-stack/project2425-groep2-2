@@ -1,4 +1,7 @@
+import { Priority as PriorityPrisma } from '@prisma/client';
+
 export class Priority{
+    private id?: number;
     private levelName: string;
     private colour: string;
 
@@ -12,5 +15,9 @@ export class Priority{
     }
     getColour(): string {
         return this.colour;
+    }
+
+    static from({id, levelName, colour}: PriorityPrisma){
+        return new Priority({levelName, colour});
     }
 }

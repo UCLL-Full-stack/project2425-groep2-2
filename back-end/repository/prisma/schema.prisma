@@ -1,0 +1,46 @@
+generator client  {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Priority {
+    id        Int      @id @default(autoincrement())
+    levelName String
+    colour     String
+    task       Task[]
+}
+
+model Task {
+    id          Int      @id @default(autoincrement())
+    description String
+    sidenote    String?
+    startDate   DateTime
+    endDate     DateTime?
+    deadline    DateTime
+    done        Boolean
+    priority    Priority @relation(fields: [priorityId], references: [id])
+    priorityId  Int
+    userId      Int
+    user        User     @relation(fields: [userId], references: [id])
+    taskHistory TaskHistory? @relation(fields: [taskHistoryId], references: [id])
+    taskHistoryId Int?
+}
+
+model User {
+    id         Int      @id @default(autoincrement())
+    username   String   @unique
+    password   String
+    tasks      Task[]
+    taskHistory TaskHistory?
+}
+
+model TaskHistory {
+    id          Int      @id @default(autoincrement())
+    userId      Int      @unique
+    user        User     @relation(fields: [userId], references: [id])
+    finishedTasks Task[]
+}
