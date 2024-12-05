@@ -72,7 +72,7 @@
  */
 import express, {NextFunction, Request, Response} from 'express';
 import taskService from '../service/task.service';
-import { TaskInput } from '../types';
+import { Role, TaskInput } from '../types';
 
 const taskRouter = express.Router();
 
@@ -80,6 +80,8 @@ const taskRouter = express.Router();
  * @swagger
  * /tasks:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get a list of all Tasks.
  *     responses:
  *       200:
@@ -91,14 +93,15 @@ const taskRouter = express.Router();
  *               items:
  *                  $ref: '#/components/schemas/Task'
  */
-taskRouter.get('/', async ( req: Request, res:Response, next: NextFunction) => {
+taskRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const tasks = await taskService.getAllTasks();
+        const request = req as Request & { auth: { username: string; role: Role } };
+        const { username, role } = request.auth;
+        const tasks = await taskService.getTasks({ username, role });
         res.status(200).json(tasks);
     } catch (error) {
-        next(error)
+        next(error);
     }
-    
 });
 /**
  * @swagger
@@ -130,6 +133,8 @@ taskRouter.get("/active",async ( req: Request, res: Response, next: NextFunction
  * @swagger
  * /tasks:
  *   post:
+ *      security:
+ *       - bearerAuth: []
  *      summary: Create a new task for a existing user.
  *      requestBody:
  *        required: true
@@ -147,8 +152,10 @@ taskRouter.get("/active",async ( req: Request, res: Response, next: NextFunction
  */
 taskRouter.post("/",async(req:Request, res:Response,next:NextFunction) => {
     try {
+        const request = req as Request & { auth: { username: string; role: Role } };
+        const { username, role } = request.auth;
         const task = <TaskInput>req.body;
-        const result = await taskService.createTask(task);
+        const result = await taskService.createTask(task,{username,role});
         res.status(200).json(result);
     } catch (error) {
         next(error)
@@ -159,6 +166,8 @@ taskRouter.post("/",async(req:Request, res:Response,next:NextFunction) => {
  * @swagger
  * /tasks/priority/{levelName}:
  *  get:
+ *      security:
+ *       - bearerAuth: []
  *      summary: Get Tasks by Priority.
  *      parameters:
  *          - in: path
@@ -179,7 +188,9 @@ taskRouter.post("/",async(req:Request, res:Response,next:NextFunction) => {
  */
 taskRouter.get("/priority/:levelName",async ( req: Request, res: Response, next: NextFunction) => {
     try {
-        const tasks = await taskService.getTasksByPriority(String(req.params.levelName));
+        const request = req as Request & { auth: { username: string; role: Role } };
+        const { username, role } = request.auth;
+        const tasks = await taskService.getTasksByPriority(String(req.params.levelName),{username,role});
         res.status(200).json(tasks);
     } catch (error) {
         next(error)

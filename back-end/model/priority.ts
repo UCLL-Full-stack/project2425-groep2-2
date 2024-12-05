@@ -5,7 +5,8 @@ export class Priority{
     private levelName: string;
     private colour: string;
 
-    constructor(priority : {levelName: string; colour: string}) {
+    constructor(priority : {id?: number; levelName: string; colour: string}) {
+        this.id = priority.id;
         this.levelName = priority.levelName;
         this.colour = priority.colour;
     }
@@ -23,7 +24,7 @@ export class Priority{
         return this.levelName === priority.getLevelName() && this.colour === priority.getColour();
     }
 
-    static from({levelName, colour}: PriorityPrisma){
-        return new Priority({levelName, colour});
+    static from({id,levelName, colour}: PriorityPrisma){
+        return new Priority({id,levelName, colour});
     }
 }

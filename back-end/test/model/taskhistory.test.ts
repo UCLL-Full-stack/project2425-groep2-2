@@ -7,7 +7,7 @@ import { finished } from 'stream';
 
 test('given valid history parameters; when: creating a new history; then: a history is created with the right parameters;', () => {
     //given:
-    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' });
+    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234', role: 'user' });
     //when:
     const history = new TaskHistory({ user, finishedTasks: [] });
     //then:
@@ -17,7 +17,7 @@ test('given valid history parameters; when: creating a new history; then: a hist
 
 test('given: valid finished task, when adding task to taskHistory, then task is added to finishedTasks list', () => {
     //given:
-    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' });
+    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' , role: 'user'});
     const history = new TaskHistory({ user, finishedTasks: [] });
     const finishedTask = new Task({
         id: 3,
@@ -39,7 +39,7 @@ test('given: valid finished task, when adding task to taskHistory, then task is 
 });
 test('given not finished task, when adding task to taskHistory, then an error should be thrown;', () => {
     //given:
-    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' });
+    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' , role: 'user'});
     const history = new TaskHistory({ user, finishedTasks: [] });
     const finishedTask = new Task({
         id: 3,

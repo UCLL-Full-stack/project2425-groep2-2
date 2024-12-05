@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import { userRouter } from './controller/user.routes';
 import { taskRouter } from './controller/task.routes';
 import { taskhistoryRouter } from './controller/taskhistory.routes';
+import { expressjwt } from 'express-jwt';
 
 const app = express();
 dotenv.config();
@@ -14,6 +15,15 @@ const port = process.env.APP_PORT || 3000;
 
 app.use(cors({ origin: 'http://localhost:8080' }));
 app.use(bodyParser.json());
+//use tokens except following routes:
+app.use(
+    expressjwt({
+        secret: process.env.JWT_SECRET || 'default_secret',
+        algorithms: ['HS256'],
+    }).unless({
+        path:['/api-docs',/^\/api-docs\/.*/, "/users/login","/users/signup","/status"]
+    })
+);
 //routes
 app.use('/users', userRouter);
 app.use('/tasks', taskRouter);

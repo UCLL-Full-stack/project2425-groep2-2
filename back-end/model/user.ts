@@ -1,3 +1,4 @@
+import { Role } from '../types';
 import {Task} from './task';
 import { User as UserPrisma, 
     Task as TaskPrisma
@@ -6,20 +7,25 @@ export class User {
     private id?: number;
     private username: string;
     private password: string;
+    private role: Role;
 
 
-    constructor(user : { id?: number; username: string; password: string; }) {
+    constructor(user : { id?: number; username: string; password: string; role: Role; }) {
         this.validate(user);
         this.id = user.id;
         this.username = user.username;
         this.password = user.password;
+        this.role = user.role;
     }
-    validate(user: {username: string, password: string}) {
-        if (!user.username) {
+    validate(user: {username: string, password: string, role:Role}) {
+        if (!user.username?.trim()) {
             throw new Error('Username is required.')
         }
-        if (!user.password) {
+        if (!user.password?.trim()) {
             throw new Error("Password is required.")
+        }
+        if (!user.role) {
+            throw new Error("Role is required.")
         }
     }
     getId(): number | undefined {
@@ -31,14 +37,17 @@ export class User {
     getPassword() : string {
         return this.password;
     }
+    getRole() : Role {
+        return this.role;
+    }
     equals(user: User): boolean {
-        return this.username === user.getUsername() && this.password === user.getPassword();
+        return this.username === user.getUsername() && this.password === user.getPassword() && this.role === user.getRole();
     }
 
 
 
 
-    static from({id, username,password}: UserPrisma){
-        return new User({id, username, password});
+    static from({id, username,password,role}: UserPrisma){
+        return new User({id, username, password, role: role as Role});
     }
 }

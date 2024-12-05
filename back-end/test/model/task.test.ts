@@ -15,7 +15,7 @@ const priority = new Priority({ levelName: 'basic', colour: 'green' });
 
 test('given: valid task parameters; when: creating a task;then: a task with the correct parameters is created;', () => {
     //given:
-    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' });
+    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' ,role: 'user'});
     //when:
     const task = new Task({
         id,
@@ -42,7 +42,7 @@ test('given: valid task parameters; when: creating a task;then: a task with the 
 
 test('given: no description; when: creating a task; then: an error is thrown ', () => {
     //given:
-    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' });
+    const user = new User({ id: 1, username: 'JohnDoe', password: 'password1234' ,role: 'user'});
     //when:
     const task = () => {
         new Task({

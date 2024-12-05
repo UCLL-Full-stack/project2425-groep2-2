@@ -25,11 +25,14 @@
 
 import express, { NextFunction, Request, Response } from 'express';
 import taskhistoryService from '../service/taskhistory.service';
+import { Role } from '../types';
 const taskhistoryRouter = express.Router();
 /**
  * @swagger
  * /taskhistory/{userId}:
  *  get:
+ *      security:
+ *       - bearerAuth: []
  *      summary: Get all finished tasks by user.
  *      parameters:
  *          - in: path
@@ -48,8 +51,10 @@ const taskhistoryRouter = express.Router();
  */
 taskhistoryRouter.get('/:userId', async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const request = req as Request & { auth: { username: string; role: Role } };
+        const { username,role } = request.auth;
         const allFinishedTasks = await taskhistoryService.getAllFinishedTasksByUser(
-            Number(req.params.userId)
+            Number(req.params.userId), {username,role}
         );
         res.status(200).json(allFinishedTasks);
     } catch (error) {
@@ -60,6 +65,8 @@ taskhistoryRouter.get('/:userId', async (req: Request, res: Response, next: Next
  * @swagger
  * /taskhistory/finishTask/{userId}/{taskId}:
  *  get:
+ *      security:
+ *       - bearerAuth: []
  *      summary: Finish a task and put it in taskHistory.
  *      parameters:
  *          - in: path
@@ -86,9 +93,12 @@ taskhistoryRouter.get(
     '/finishTask/:userId/:taskId',
     async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const request = req as Request & { auth: { username: string; role: Role } };
+            const { username,role } = request.auth;
             const finishTask = await taskhistoryService.addFinishedTaskToHistoryByUser(
                 Number(req.params.userId),
-                Number(req.params.taskId)
+                Number(req.params.taskId),
+                {username,role}
             );
             res.status(200).json(finishTask);
         } catch (error) {

@@ -2,6 +2,7 @@ import { addDays } from 'date-fns';
 import { Task } from '../model/task';
 import { Priority } from '../model/priority';
 import database from './database';
+import { User } from '../model/user';
 
 const createTask = async (task: Task): Promise<Task> => {
     try {
@@ -88,6 +89,25 @@ const getTaskById = async (id: number): Promise<Task | null> => {
         throw new Error('Database error. See server log for details.');
     }
 };
+
+const getActiveTasksByUser = async (user: User): Promise<Task[]> => {
+    try {
+        const tasksPrisma = await database.task.findMany({
+            where: {
+                done: false,
+                userId: user.getId()
+            },
+            include: {
+                priority: true,
+                user: true,
+            }
+        });
+        return tasksPrisma.map((taskPrisma) => Task.from(taskPrisma));
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+  }
+}
 const getTasksByPriority = async (levelName: string): Promise<Task[]> => {
     try {
         const tasksPrisma = await database.task.findMany({
@@ -130,5 +150,6 @@ export default {
     getTaskById,
     deleteTask,
     getActiveTasks,
-    getTasksByPriority
+    getTasksByPriority,
+    getActiveTasksByUser
 };

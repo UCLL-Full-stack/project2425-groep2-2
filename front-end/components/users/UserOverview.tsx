@@ -11,7 +11,7 @@ const UserOverview: React.FC<Props> = ({users,selectUser}) =>{
         <>
         {users && 
         users.map((user, index)=>(
-            <table className="border border- border-4 m-2 bg-secondary bg-opacity-25">
+            <table className="border-4 m-2 bg-secondary bg-opacity-25">
             <tr key = {index}
             onClick={() => selectUser(user)}
             role="button">

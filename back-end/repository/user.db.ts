@@ -49,10 +49,9 @@ const getAllUsers = async (): Promise<User[]> => {
             include: {
                 tasks: true,
             },
-        })
+        });
         return usersPrisma.map((user) => User.from(user));
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
         throw new Error('Database error. See server log for details.');
     }
@@ -61,11 +60,21 @@ const getAllUsers = async (): Promise<User[]> => {
 const getUserById = async (id: number): Promise<User | null> => {
     try {
         const userPrisma = await database.user.findUnique({
-            where: {id},
-        })
-        return  userPrisma ? User.from(userPrisma) : null;
+            where: { id },
+        });
+        return userPrisma ? User.from(userPrisma) : null;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
     }
-    catch (error) {
+};
+const getUserByUserName = async (username: string): Promise<User | null> => {
+    try {
+        const userPrisma = await database.user.findFirst({
+            where: { username },
+        });
+        return userPrisma ? User.from(userPrisma) : null;
+    } catch (error) {
         console.error(error);
         throw new Error('Database error. See server log for details.');
     }
@@ -76,19 +85,19 @@ const createUser = async (user: User): Promise<User> => {
             data: {
                 username: user.getUsername(),
                 password: user.getPassword(),
-            }
-        })
+                role: user.getRole(),
+            },
+        });
         return User.from(userPrisma);
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
         throw new Error('Database error. See server log for details.');
     }
-}
-
+};
 
 export default {
     getAllUsers,
     getUserById,
     createUser,
+    getUserByUserName,
 };
