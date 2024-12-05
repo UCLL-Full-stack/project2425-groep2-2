@@ -1,3 +1,4 @@
+import { UnauthorizedError } from 'express-jwt';
 import { Priority } from '../../model/priority';
 import { Task } from '../../model/task';
 import { User } from '../../model/user';
@@ -22,14 +23,14 @@ const user = new User({
     id: id,
     username: 'johnDoe',
     password: 'password1234',
-    role: "user"
+    role: 'user',
 });
 
-const userInput: UserInput =  {
+const userInput: UserInput = {
     id: id,
     username: 'johnDoe',
     password: 'password1234',
-    role:"user"
+    role: 'user',
 };
 
 const description = 'shopping 2.0';
@@ -39,28 +40,30 @@ const startDate = new Date();
 const done = false;
 const userId = 1;
 
-const tasks = [ new Task({
-    id: 1,
-    description: 'shopping',
-    sidenote: 'need to do shopping for food.',
-    startDate: new Date(),
-    endDate: null,
-    deadline: addDays(new Date(), 1),
-    done: true,
-    priority: new Priority({ id:1,levelName: 'basic', colour: 'success' }),
-    user,
-}),
-new Task({
-    id: 2,
-    description: 'uploading paper',
-    sidenote: 'uploading a paper for a certain course',
-    startDate: new Date(),
-    endDate: null,
-    deadline: addDays(new Date(), 4),
-    done: false,
-    priority: new Priority({ id:2,levelName: 'basic', colour: 'success' }),
-    user,
-})]
+const tasks = [
+    new Task({
+        id: 1,
+        description: 'shopping',
+        sidenote: 'need to do shopping for food.',
+        startDate: new Date(),
+        endDate: null,
+        deadline: addDays(new Date(), 1),
+        done: true,
+        priority: new Priority({ id: 1, levelName: 'basic', colour: 'success' }),
+        user,
+    }),
+    new Task({
+        id: 2,
+        description: 'uploading paper',
+        sidenote: 'uploading a paper for a certain course',
+        startDate: new Date(),
+        endDate: null,
+        deadline: addDays(new Date(), 4),
+        done: false,
+        priority: new Priority({ id: 2, levelName: 'basic', colour: 'success' }),
+        user,
+    }),
+];
 
 let mockUserDbgetUserByUserName: jest.Mock;
 let mockPriorityDbGetPriorityById: jest.Mock;
@@ -114,86 +117,100 @@ test('given: valid task, when: task is created, then task is created with those 
     //given:
     mockUserDbgetUserByUserName.mockResolvedValue(user);
     mockPriorityDbCreatePriority.mockResolvedValue(priority);
-    mockTaskDbCreateTask.mockResolvedValue(new Task({
-        description,
-        sidenote,
-        startDate: new Date(),
-        endDate: null,
-        done: false,
-        deadline,
-        priority,
-        user
-    }));
+    mockTaskDbCreateTask.mockResolvedValue(
+        new Task({
+            description,
+            sidenote,
+            startDate: new Date(),
+            endDate: null,
+            done: false,
+            deadline,
+            priority,
+            user,
+        })
+    );
 
     //when:
-    const result = await taskService.createTask({
-        description,
-        sidenote,
-        deadline,
-        priority: priorityInput,
-        user: userInput,
-    }, { username: userInput.username, role: userInput.role });
+    const result = await taskService.createTask(
+        {
+            description,
+            sidenote,
+            deadline,
+            priority: priorityInput,
+            user: userInput,
+        },
+        { username: userInput.username, role: userInput.role }
+    );
 
     //then:
     expect(mockUserDbgetUserByUserName).toHaveBeenCalledTimes(1);
     expect(mockTaskDbCreateTask).toHaveBeenCalledTimes(1);
-    expect(mockTaskDbCreateTask).toHaveBeenCalledWith(expect.objectContaining({
-        description,
-        sidenote,
-        startDate: expect.any(Date),
-        endDate: null,
-        done: false,
-        deadline,
-        priority: expect.objectContaining({
-            id: priority.getId(),
-            levelName: priority.getLevelName(),
-            colour: priority.getColour()
-        }),
-        user: expect.objectContaining({
-            id: user.getId(),
-            username: user.getUsername(),
-            role: user.getRole()
+    expect(mockTaskDbCreateTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+            description,
+            sidenote,
+            startDate: expect.any(Date),
+            endDate: null,
+            done: false,
+            deadline,
+            priority: expect.objectContaining({
+                id: priority.getId(),
+                levelName: priority.getLevelName(),
+                colour: priority.getColour(),
+            }),
+            user: expect.objectContaining({
+                id: user.getId(),
+                username: user.getUsername(),
+                role: user.getRole(),
+            }),
         })
-    }));
+    );
 });
 
 test('given no user, when: task is created, then an error is thrown', async () => {
     expect.assertions(1);
     mockUserDbgetUserByUserName.mockResolvedValue(null);
 
-    await expect(taskService.createTask({
-        description,
-        sidenote,
-        deadline,
-        priority: priorityInput,
-        user: userInput,
-    }, { username: userInput.username, role: userInput.role })).rejects.toThrow(`User not found with given username: ${userInput.username}.`);
+    await expect(
+        taskService.createTask(
+            {
+                description,
+                sidenote,
+                deadline,
+                priority: priorityInput,
+                user: userInput,
+            },
+            { username: userInput.username, role: userInput.role }
+        )
+    ).rejects.toThrow(`User not found with given username: ${userInput.username}.`);
 });
 
 test('given active tasks, when:getting all active tasks, then all active tasks are returned', async () => {
     //given:
-    const activeTasks = [ new Task({
-        id: 1,
-        description: 'shopping',
-        sidenote: 'need to do shopping for food.',
-        startDate: new Date(),
-        endDate: null,
-        deadline: addDays(new Date(), 1),
-        done: false,
-        priority: new Priority({ levelName: 'basic', colour: 'success' }),
-        user,
-    }),
-    new Task({
-        id: 2,
-        description: 'uploading paper',
-        sidenote: 'uploading a paper for a certain course',
-        startDate: new Date(),
-        endDate: null,
-        deadline: addDays(new Date(), 4),
-        done: false,
-        priority: new Priority({ levelName: 'basic', colour: 'success' }),
-        user,
-    })]
+    const activeTasks = [
+        new Task({
+            id: 1,
+            description: 'shopping',
+            sidenote: 'need to do shopping for food.',
+            startDate: new Date(),
+            endDate: null,
+            deadline: addDays(new Date(), 1),
+            done: false,
+            priority: new Priority({ levelName: 'basic', colour: 'success' }),
+            user,
+        }),
+        new Task({
+            id: 2,
+            description: 'uploading paper',
+            sidenote: 'uploading a paper for a certain course',
+            startDate: new Date(),
+            endDate: null,
+            deadline: addDays(new Date(), 4),
+            done: false,
+            priority: new Priority({ levelName: 'basic', colour: 'success' }),
+            user,
+        }),
+    ];
     mockTaskDbGetActiveTasks.mockResolvedValue(activeTasks);
 
     //when:
@@ -217,13 +234,16 @@ test('given active tasks, when:getting all active tasks, then all active tasks a
     expect(result).toEqual([]);
 });
 
-test("given valid levelName, when: getting Tasks By Priority, then those tasks are returned", async () => {
+test('given valid levelName, when: getting Tasks By Priority, then those tasks are returned', async () => {
     //given:
     mockPriorityDbGetPriorityByName.mockResolvedValue([priority]);
     mockTaskDbGetTasksByPriority.mockResolvedValue(tasks);
 
     //when:
-    const result = await taskService.getTasksByPriority("basic", {username: user.getUsername(), role: user.getRole()});
+    const result = await taskService.getTasksByPriority('basic', {
+        username: user.getUsername(),
+        role: user.getRole(),
+    });
 
     //then:
     expect(mockPriorityDbGetPriorityByName).toHaveBeenCalledTimes(1);
@@ -232,13 +252,16 @@ test("given valid levelName, when: getting Tasks By Priority, then those tasks a
     expect(result).toEqual(tasks);
 });
 
-test("given valid levelName with no tasks, when: getting Tasks By Priority, then empty list is returned", async () => {
+test('given valid levelName with no tasks, when: getting Tasks By Priority, then empty list is returned', async () => {
     //given:
     mockPriorityDbGetPriorityByName.mockResolvedValue([priority]);
     mockTaskDbGetTasksByPriority.mockResolvedValue([]);
 
     //when:
-    const result = await taskService.getTasksByPriority("urgent", {username: user.getUsername(), role: user.getRole()});
+    const result = await taskService.getTasksByPriority('urgent', {
+        username: user.getUsername(),
+        role: user.getRole(),
+    });
 
     //then:
     expect(mockPriorityDbGetPriorityByName).toHaveBeenCalledTimes(1);
@@ -247,9 +270,50 @@ test("given valid levelName with no tasks, when: getting Tasks By Priority, then
     expect(result).toEqual([]);
 });
 
-test("given unknown levelName, when: getting Tasks By Priority, then an error is thrown", async () => {
+test('given unknown levelName, when: getting Tasks By Priority, then an error is thrown', async () => {
     expect.assertions(1);
     mockPriorityDbGetPriorityByName.mockResolvedValue(null);
 
-    await expect(taskService.getTasksByPriority("notALevel", {username: user.getUsername(), role: user.getRole()})).rejects.toThrow("No Priority found with levelName: notALevel.");
+    await expect(
+        taskService.getTasksByPriority('notALevel', {
+            username: user.getUsername(),
+            role: user.getRole(),
+        })
+    ).rejects.toThrow('No Priority found with levelName: notALevel.');
+});
+
+test('given invalid role, when: calling getTasks, then an error is thrown', async () => {
+    const activeTasks = [
+        new Task({
+            id: 1,
+            description: 'shopping',
+            sidenote: 'need to do shopping for food.',
+            startDate: new Date(),
+            endDate: null,
+            deadline: addDays(new Date(), 1),
+            done: false,
+            priority: new Priority({ levelName: 'basic', colour: 'success' }),
+            user,
+        }),
+        new Task({
+            id: 2,
+            description: 'uploading paper',
+            sidenote: 'uploading a paper for a certain course',
+            startDate: new Date(),
+            endDate: null,
+            deadline: addDays(new Date(), 4),
+            done: false,
+            priority: new Priority({ levelName: 'basic', colour: 'success' }),
+            user,
+        }),
+    ];
+    mockUserDbgetUserByUserName.mockResolvedValue(user);
+    mockTaskDbGetActiveTasks.mockResolvedValue(activeTasks);
+    await expect(
+        taskService.getTasks({ username: user.getUsername(), role: 'invalid' })
+    ).rejects.toThrow(
+        new UnauthorizedError('credentials_required', {
+            message: 'you are not authorized to access this resource.',
+        })
+    );
 });
